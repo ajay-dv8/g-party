@@ -15,7 +15,15 @@ interface PasswordInputProps extends Omit<InputHTMLAttributes<HTMLInputElement>,
 }
 
 const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
-  ({ label, placeholder, className, forgotPasswordClassName, ...props }, ref) => {
+  ({ 
+    label, 
+    placeholder, 
+    className, 
+    forgotPasswordClassName, 
+    ...props 
+  }, 
+    ref
+  ) => {
     const id = useId();
     const [isVisible, setIsVisible] = useState<boolean>(false);
     const toggleVisibility = () => setIsVisible((prevState) => !prevState);

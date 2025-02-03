@@ -2,13 +2,14 @@
 import React from 'react'
 import { Button } from './ui/button'
 import Link from 'next/link'
+import { app } from '@/constants/ganeral-info';
  
  export const LandingNav = () => {
    return (
      <div className="w-full flex justify-between items-center ~px-4/20 ~py-2/4 ">
         <div className="flex items-center gap-x-3">
           <Image src="/logo.svg" alt="logo" width={50} height={50}/>  
-          <h1 className="text-2xl font-bold">Sendsom</h1>
+          <h1 className="text-2xl font-bold">{app.name}</h1>
         </div>
 
         <div className="flex items-center gap-x-4">

@@ -8,9 +8,11 @@ import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import PasswordInput from '@/components/ui/password-input' 
-import { useForm, SubmitHandler } from 'react-hook-form'; 
-import { SignUpForm } from '@/components/signupForm';
-import { createClient } from '@/utils/supabase/client';
+import { useForm } from 'react-hook-form'; 
+import { SignUpForm } from '@/components/signupForm'; 
+import { supabase } from '@/utils/supabase/auth-client';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
 
 const SignIn = () => {
   const searchParams = useSearchParams();
@@ -44,85 +46,92 @@ const SignIn = () => {
 export default SignIn
 
 
-// SIGN IN FORM
 
-interface SignInFormInputs {
-  email: string;
-  password: string;
-}
+// SIGN IN FORM 
+
+// Define form schema using Zod for validation
+const signInSchema = z.object({
+  email: z.string().email("Invalid email address").min(1, "Email is required"),
+  password: z.string().min(6, "Password must be at least 6 characters").min(1, "Password is required"),
+});
+
+// Define TypeScript interface for form inputs
+interface SignInFormInputs extends z.infer<typeof signInSchema> {}
+
 export const SignInForm = () => {
+  const router = useRouter();
+  const [isLoading, setIsLoading] = useState(false);
+  const [authError, setAuthError] = useState<string | null>(null);
 
+  // Initialize react-hook-form with Zod validation
   const {
     register,
     handleSubmit,
     formState: { errors },
-  } = useForm<SignInFormInputs>();
+  } = useForm<SignInFormInputs>({
+    resolver: zodResolver(signInSchema),
+  });
 
-  
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const router = useRouter();
+  // Handle form submission
+  const handleLogin = async (data: SignInFormInputs) => {
+    const { email, password } = data;
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    if (error) {
-      console.error("Error logging in:", error.message);
-    } else {
+    setIsLoading(true); // Set loading state
+    setAuthError(null); // Clear any previous auth errors
+
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) {
+        throw new Error(error.message || "Failed to log in");
+      }
+
+      // Redirect to dashboard on successful login
       router.push("/dashboard");
+    } catch (error: any) {
+      console.error("Error logging in:", error.message);
+      setAuthError(error.message || "An unknown error occurred");
+    } finally {
+      setIsLoading(false); // Reset loading state
     }
-    setIsLoading(false);
   };
 
   return (
     <div className="w-full ~p-8/20">
       <div className="w-full my-10">
-        <h1 className="text-4xl font-semibold ">Welcome back</h1>
+        <h1 className="text-4xl font-semibold">Welcome back</h1>
         <h5 className="text-muted-foreground my-2">Sign in to your account</h5>
       </div>
 
-      <form onSubmit={handleLogin} className=" flex flex-col gap-y-4 w-full">
-        <div className="">
+      {/* Form */}
+      <form onSubmit={handleSubmit(handleLogin)} className="flex flex-col gap-y-4 w-full">
+        {/* Email Input */}
+        <div>
           <Label htmlFor="email">Email</Label>
           <Input
             type="email"
             id="email"
             placeholder="example@email.com"
-            {...register('email', {
-              required: 'Email is required',
-              pattern: {
-                value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                message: 'Invalid email address',
-              },
-            })}
+            {...register("email")}
           />
           {errors.email && (
             <p className="text-sm text-red-500 mt-1">{errors.email.message}</p>
           )}
         </div>
-        <div className="w-full">
-          {/* Password Input component with lable and forgot password link from components/ui/password-input */}
+
+        {/* Password Input */}
+        <div>
           <PasswordInput
             label="Password"
             placeholder="Password"
-            {...register('password', {
-              required: 'Password is required',
-              minLength: {
-                value: 8,
-                message: 'Password must be at least 8 characters',
-              },
-            })}
+            {...register("password")}
           />
           {errors.password && (
             <p className="text-sm text-red-500 mt-1">{errors.password.message}</p>
           )}
-
           <Link
             href="/forgot-password"
             className="text-primary text-sm text-end hover:underline"
@@ -131,20 +140,27 @@ export const SignInForm = () => {
           </Link>
         </div>
 
-        <Button
-          className='mt-2'> Sign In
+        {/* Auth Error Message */}
+        {authError && (
+          <p className="text-sm text-red-500 mt-2">{authError}</p>
+        )}
+
+        {/* Sign In Button */}
+        <Button type="submit" disabled={isLoading} className="mt-2">
+          {isLoading ? "Logging in..." : "Sign In"}
         </Button>
       </form>
 
-      <p className="text-muted-foreground text-sm mt-2 text-center">
-        Don't have an account? <Link href="/sign-in?form=sign-up" className="text-primary hover:underline">Sign Up</Link>
+      {/* Sign Up Link */}
+      <p className="text-muted-foreground text-sm mt-4 text-center">
+        Don't have an account?{" "}
+        <Link
+          href="/sign-in?form=sign-up"
+          className="text-primary hover:underline"
+        >
+          Sign Up
+        </Link>
       </p>
     </div>
-  )
-}
-
-
-
-
-
-
+  );
+};
