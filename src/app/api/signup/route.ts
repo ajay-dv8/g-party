@@ -21,6 +21,8 @@ export async function POST(req: Request) {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     } 
+    // TODO: Add username already exists validation
+    // TODO: Add email already exists validation
 
     // Sign up with Supabase Auth
     const { data: authUser, error: authError } = await supabase.auth.signUp({

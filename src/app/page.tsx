@@ -1,10 +1,10 @@
-import { LandingNav } from "@/components/landing-nav";
+import { Navbar } from "@/components/navbar";
  
 
 export default function Home() {
   return (
     <div className=" ">
-      <LandingNav />
+      <Navbar />
       
     </div>
   );

@@ -91,7 +91,7 @@ export const SignUpForm = () => {
           <>
             {/* Full Name Input */}
             <Label htmlFor="fullName">Full Name</Label>
-            <Input type="text" id="fullName" placeholder="John Doe" {...register('full_name')} />
+            <Input type="text" id="fullName" placeholder="John Doe" className='capitalize' {...register('full_name')} />
             {errors.full_name && <p className="text-sm text-red-500 mt-1">{errors.full_name.message}</p>}
 
             {/* Email Input */}
