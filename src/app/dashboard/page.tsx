@@ -16,8 +16,7 @@ const Dashboard = () => {
   }
 
   return (
-    <>
-    <Navbar />
+    <> 
     <div className="w-full ~p-8/14 text-5xl">Dashboard</div>
 
     <Button onClick={signout}> 

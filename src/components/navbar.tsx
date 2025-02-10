@@ -6,6 +6,20 @@ import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { app } from '@/constants/ganeral-info';
 import { useUser } from '@/hooks/use-user';
+import { ChevronDown } from 'lucide-react'; 
+ 
+import {
+  Sheet,
+  SheetClose,
+  SheetContent,
+  SheetDescription,
+  SheetFooter,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet" 
+import { ProfileImageCard } from './profile-image-card';
+import { LogoutButton } from './logout-button';
 
 // Auth buttons component
 const AuthButtons = () => (
@@ -29,12 +43,50 @@ export const ProfileImage = () => {
   if (error || !user) return null;
 
   return (
-    <Avatar>
-      <AvatarImage src="{user.image}" alt="dp" />
-      <AvatarFallback className='font-bold'>
-        {user.username?.slice(0, 1).toUpperCase()}
-      </AvatarFallback>
-    </Avatar>
+    <>
+    <p>Hi, {user.username}</p>
+ 
+    <Sheet>
+      <SheetTrigger asChild>
+        <div className="flex items-center gap-x-2 cursor-pointer">
+        <Avatar>
+          <AvatarImage src="{user.image}" alt="dp" />
+          <AvatarFallback className='font-bold'>
+            {user.username?.slice(0, 1).toUpperCase()}
+          </AvatarFallback>
+        </Avatar>
+        <ChevronDown className='h-4 w-4' />
+        </div>
+      </SheetTrigger>
+
+      <SheetContent>
+        <SheetHeader>
+          <SheetTitle>Account</SheetTitle>
+          <SheetDescription>
+            Check basic account details
+          </SheetDescription>
+        </SheetHeader>
+
+        <div className="w-full flex items-center my-10 justify-center">
+          <ProfileImageCard 
+            name={user.full_name ?? "Unknown"}
+            username={user.username ?? "Unknown"}
+            imageUrl={"https://github.com/shadcn.png"}
+            onAvatarClick={() => {
+              console.log("Avatar clicked")
+            }}
+          />
+
+
+        </div>
+        <SheetFooter>
+          <SheetClose asChild>
+            <LogoutButton className='w-full text-primary/70 hover:text-primary hover:bg-primary/10'/>
+          </SheetClose>
+        </SheetFooter>
+      </SheetContent>
+    </Sheet> 
+    </>
   );
 };
 
@@ -72,17 +124,7 @@ export const Navbar = () => {
 
 
 
-// "use client";
-// import Image from 'next/image'
-// import React, { useEffect, useState } from 'react'
-// import { Button } from './ui/button'
-// import Link from 'next/link'
-// import { app } from '@/constants/ganeral-info';
-// import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar'; 
-// import { UserData } from '@/types';
-// import { getCurrentUser } from '@/app/actions/getUser/action';
  
-
 // export const Navbar = () => {
 
 //   const [user, setUser] = useState<UserData | null>(null);
@@ -142,42 +184,4 @@ export const Navbar = () => {
 //   )
 // }
  
-
-
-// export const ProfileImage = () => {
-//   const [user, setUser] = useState<UserData>(null);
-//   const [loading, setLoading] = useState(true);
-//   const [error, setError] = useState<string | null>(null);
  
-//   useEffect(() => {
-//     async function loadUserData() {
-//       try {
-//         setLoading(true);
-//         const userData = await getCurrentUser();
-        
-//         if (!userData) {
-//           setError('No user data found');
-//           return;
-//         }
-
-//         setUser(userData);
-//       } catch (err) {
-//         setError('Failed to load user data');
-//         console.error('Error loading user:', err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     }
-
-//     loadUserData();
-//   }, []);
-  
-//   return (
-//     <Avatar>
-//       <AvatarImage src="https://github.com/shadc" alt="Profile" />
-//       <AvatarFallback className="font-bold">
-//         {user?.username?.slice(0, 1).toUpperCase()}
-//       </AvatarFallback> 
-//     </Avatar>
-//   );
-// }
