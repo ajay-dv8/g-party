@@ -4,6 +4,44 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+// generator client {
+//   provider = "prisma-client-js"
+// }
+
+// datasource db {
+//   provider = "postgresql"
+//   url      = env("DATABASE_URL")
+//   directUrl = env("DIRECT_URL")
+// }
+
+
+// model User {
+//   user_id         String  @id @default(uuid())
+//   email           String  @unique
+//   full_name       String 
+//   username        String  @unique
+//   gender          String   
+//   dob             String?  
+//   phone           String?
+//   country         String? 
+//   createdAt       DateTime @default(now())
+//   updatedAt       DateTime @updatedAt
+// }
+
+
+
+
+// WITH OPTIMIZATION
+// ==============================================
+// 📚 WALLET SYSTEM DATABASE SCHEMA
+// ==============================================
+// This schema defines a complete wallet system where users can:
+// - Manage their money (wallet)
+// - Send/receive funds
+// - Create payment requests
+// - Connect multiple payment methods
+// - Receive notifications
+
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,18 +50,238 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+} 
+// ==============================================
+// ENUMS
+// ==============================================
+enum RequestStatus {
+  PENDING
+  COMPLETED
+  CANCELLED
+  EXPIRED
 }
 
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  FAILED
+  CANCELLED
+}
 
+enum TransactionType {
+  DEPOSIT
+  WITHDRAWAL
+  TRANSFER
+  REQUEST_PAYMENT
+}
+
+enum AccountStatus {
+  ACTIVE
+  INACTIVE
+  SUSPENDED
+  CLOSED
+}
+
+enum PaymentType {
+  BANK_ACCOUNT
+  MOBILE_MONEY
+  CARD
+}
+
+enum WalletStatus {
+  ACTIVE
+  INACTIVE
+  FROZEN
+}
+
+// ==============================================
+// 👤 USER MODEL
+// ==============================================
 model User {
-  user_id         String  @id @default(uuid())
-  email           String  @unique
-  full_name       String 
-  username        String  @unique
-  gender          String   
-  dob             String?  
-  phone           String?
-  country         String? 
+  id              String    @id @default(uuid()) @db.Uuid
+  email           String    @unique
+  username        String    @unique
+  full_name       String
+  phone           String?   @unique
+  country         String?
+  gender          String
+  dob             String?
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  wallet          Wallet?
+  sentTransactions     Transaction[] @relation("SentTransactions")
+  receivedTransactions Transaction[] @relation("ReceivedTransactions")
+  fundRequests    FundRequest[]  @relation("RequestCreator")
+  fundRecipients  FundRecipient[] @relation("RequestRecipient")
+  notifications   Notification[]
+
+  @@index([username])
+  @@index([email])
+  @@index([phone])
+}
+
+// ==============================================
+// 💰 WALLET MODEL
+// ==============================================
+model Wallet {
+  id              String    @id @default(dbgenerated("CONCAT(UPPER(SUBSTRING(MD5(gen_random_uuid()::text) FROM 1 FOR 6)))"))
+  balance         Decimal   @default(0) @db.Decimal(15, 2)
+  status          WalletStatus @default(ACTIVE)
+
+  connectedAccounts PaymentMethod[]
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId          String   @unique @db.Uuid
+
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  @@index([id])
 }
+
+// ==============================================
+// 💳 PAYMENT METHOD MODEL
+// ==============================================
+model PaymentMethod {
+  id              String    @id @default(uuid()) @db.Uuid
+  type            PaymentType
+  accountNumber   String
+  accountName     String
+  isDefault       Boolean   @default(false)
+  status          AccountStatus @default(ACTIVE)
+
+  wallet          Wallet    @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  walletId        String
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@unique([walletId, accountNumber])
+}
+
+// ==============================================
+// 💸 TRANSACTION MODEL
+// ==============================================
+model Transaction {
+  id              String    @id @default(uuid()) @db.Uuid
+  amount          Decimal   @db.Decimal(15, 2)
+  type            TransactionType
+  status          TransactionStatus @default(PENDING)
+  description     String?
+  metadata        Json?
+
+  sender          User?     @relation("SentTransactions", fields: [senderId], references: [id])
+  senderId        String?   @db.Uuid
+  recipient       User?     @relation("ReceivedTransactions", fields: [recipientId], references: [id])
+  recipientId     String?   @db.Uuid
+  
+  fundRequest     FundRequest? @relation(fields: [requestId], references: [id])
+  requestId       String?   @db.Uuid
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([senderId])
+  @@index([recipientId])
+  @@index([createdAt])
+}
+
+// ==============================================
+// 📢 FUND REQUEST MODEL
+// ==============================================
+model FundRequest {
+  id              String    @id @default(uuid()) @db.Uuid
+  amount          Decimal   @db.Decimal(15, 2)
+  title           String
+  message         String?
+  status          RequestStatus @default(PENDING)
+  expiresAt       DateTime
+  totalRecipients Int       @default(0)
+
+  creator         User      @relation("RequestCreator", fields: [creatorId], references: [id])
+  creatorId       String    @db.Uuid
+
+  recipients      FundRecipient[]
+  transactions    Transaction[]
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([creatorId])
+  @@index([expiresAt])
+}
+
+// ==============================================
+// 📬 NOTIFICATION MODEL
+// ==============================================
+model Notification {
+  id        String   @id @default(uuid()) @db.Uuid
+  message   String
+  read      Boolean  @default(false)
+  
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String   @db.Uuid
+  
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([read])
+}
+
+// ==============================================
+// 💰 FUND RECIPIENT MODEL
+// ==============================================
+model FundRecipient {
+  id          String      @id @default(uuid()) @db.Uuid
+  amount      Decimal     @db.Decimal(15, 2)
+  status      RequestStatus @default(PENDING)
+
+  request     FundRequest @relation(fields: [requestId], references: [id])
+  requestId   String      @db.Uuid
+  
+  user        User        @relation("RequestRecipient", fields: [userId], references: [id])
+  userId      String      @db.Uuid
+
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([requestId])
+  @@index([userId])
+}
+// Rest of the models follow similar patterns...
+// (Notification model and enums remain the same)
+
+/* 🔄 SYSTEM-WIDE RECOMMENDED IMPROVEMENTS:
+
+1. Audit Trail:
+   - Add an AuditLog model to track all important changes
+   - Record who made changes and when
+   - Store old and new values
+
+2. Security Features:
+   - Add rate limiting for transactions
+   - Add two-factor authentication support
+   - Add IP address tracking
+   - Add device fingerprinting
+
+3. Performance Optimizations:
+   - Add database partitioning for transactions
+   - Add caching for wallet balances
+   - Add materialized views for reports
+   - Add database sharding for scaling
+
+4. Business Features:
+   - Add loyalty points system
+   - Add recurring payments
+   - Add bill splitting
+   - Add merchant accounts
+   - Add group wallets
+
+5. Compliance:
+   - Add KYC verification
+   - Add transaction limits by user level
+   - Add compliance reporting
+   - Add risk scoring
+*/

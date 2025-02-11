@@ -45,8 +45,11 @@ const Dashboard = () => {
   return (
     <div className='w-full grid grid-cols-5 gap-x-10 mt-10'> 
       <div className='col-span-2 flex flex-col gap-y-10'> 
-        <BalanceCard />
- 
+        <BalanceCard 
+        currency ={'$'}
+        balanceAmount={1010.47}
+        /> 
+
         <div className="flex gap-x-3 items-center justify-around">
           {actionCardInfo.map((card, index) => (
             <ActionCard
@@ -62,7 +65,7 @@ const Dashboard = () => {
         <ConnectedAccountCard
           image ={'/momoIcons/tcash.webp'}
           accountType ={'telecel cash'}
-          accountNumber ={user.phone}
+          accountNumber ={user.phone} 
         />
       </div>
 
