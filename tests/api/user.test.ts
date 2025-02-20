@@ -34,7 +34,7 @@ describe("GET /api/user", function () {
   it("should return user details if user exists", async function () {
     // Simulate an existing user
     const existingUser = {
-      user_id: "real-user-id",
+      id: "real-user-id",
       full_name: "John Doe",
       email: "john@example.com",
       username: "johndoe",

@@ -1,12 +1,12 @@
- import { PrismaClient } from "@prisma/client"; 
- import { createClient } from '@supabase/supabase-js';
-
-
+// signup/route.ts
+import { prisma } from "@/lib/prisma"; 
+import { createClient } from "@supabase/supabase-js";
+ 
 export const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 ); 
-
+ 
 export async function POST(req: Request) {
   try {
     console.log('API Route Hit!');
@@ -21,14 +21,37 @@ export async function POST(req: Request) {
         { status: 400, headers: { 'Content-Type': 'application/json' } }
       );
     } 
-    // TODO: Add username already exists validation
-    // TODO: Add email already exists validation
+
+    // const prisma = new PrismaClient();
+    // Check if username or email already exists
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [
+          { email },
+          { username },
+          { phone }
+        ]
+      }
+    });
+
+    if (existingUser) {
+      return new Response(
+        JSON.stringify({ 
+          message: existingUser.email === email 
+            ? 'Email already in use' 
+            : existingUser.username === username
+            ? 'Username already taken' 
+            : 'Phone number already in use'
+        }),
+        { status: 400, headers: { 'Content-Type': 'application/json' } }
+      );
+    }
 
     // Sign up with Supabase Auth
     const { data: authUser, error: authError } = await supabase.auth.signUp({
       email,
       password,
-    });
+    }); 
 
     if (authError) {
       return new Response(
@@ -37,30 +60,29 @@ export async function POST(req: Request) {
       );
     }
 
-    const prisma = new PrismaClient();
-
     // Store user data in the database
     const user = await prisma.user.create({
       data: {
-        user_id: authUser.user?.id || '',
+        id: authUser.user?.id || '',
         email: authUser.user?.email || '',
         full_name,
         username,
         gender,
         phone,
       },
-    });
+    }); 
 
     return new Response(JSON.stringify(user), {
       status: 200,
       headers: { 'Content-Type': 'application/json' },
     });
-  } catch (error) {
+    
+  } catch (error) { 
     return new Response(
       JSON.stringify({ message: 'Signup failed', error }),
       { status: 500, headers: { 'Content-Type': 'application/json' } }
     );
   }
-}
+ } 
 
  

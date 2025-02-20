@@ -196,3 +196,152 @@ ALTER TABLE "FundRecipient" ADD CONSTRAINT "FundRecipient_requestId_fkey" FOREIG
 
 -- AddForeignKey
 ALTER TABLE "FundRecipient" ADD CONSTRAINT "FundRecipient_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- -- Step 1: Create all the ENUMs
+-- CREATE TYPE "RequestStatus" AS ENUM ('PENDING', 'COMPLETED', 'CANCELLED', 'EXPIRED');
+-- CREATE TYPE "TransactionStatus" AS ENUM ('PENDING', 'COMPLETED', 'FAILED', 'CANCELLED');
+-- CREATE TYPE "TransactionType" AS ENUM ('DEPOSIT', 'WITHDRAWAL', 'TRANSFER', 'REQUEST_PAYMENT');
+-- CREATE TYPE "AccountStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'SUSPENDED', 'CLOSED');
+-- CREATE TYPE "PaymentType" AS ENUM ('BANK_ACCOUNT', 'MOBILE_MONEY', 'CARD');
+-- CREATE TYPE "WalletStatus" AS ENUM ('ACTIVE', 'INACTIVE', 'FROZEN');
+
+-- -- Step 2: Create new tables that don't exist yet
+-- CREATE TABLE IF NOT EXISTS "Notification" (
+--     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+--     "message" TEXT NOT NULL,
+--     "read" BOOLEAN NOT NULL DEFAULT false,
+--     "userId" UUID NOT NULL,
+--     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     CONSTRAINT "Notification_pkey" PRIMARY KEY ("id")
+-- );
+
+-- CREATE TABLE IF NOT EXISTS "FundRecipient" (
+--     "id" UUID NOT NULL DEFAULT uuid_generate_v4(),
+--     "amount" DECIMAL(15,2) NOT NULL,
+--     "status" "RequestStatus" NOT NULL DEFAULT 'PENDING',
+--     "requestId" UUID NOT NULL,
+--     "userId" UUID NOT NULL,
+--     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--     "updatedAt" TIMESTAMP(3) NOT NULL,
+--     CONSTRAINT "FundRecipient_pkey" PRIMARY KEY ("id")
+-- );
+
+-- -- Step 3: Add temporary columns for existing enum fields
+-- ALTER TABLE "Transaction" 
+-- ADD COLUMN IF NOT EXISTS "status_new" "TransactionStatus",
+-- ADD COLUMN IF NOT EXISTS "type_new" "TransactionType";
+
+-- ALTER TABLE "PaymentMethod" 
+-- ADD COLUMN IF NOT EXISTS "status_new" "AccountStatus",
+-- ADD COLUMN IF NOT EXISTS "type_new" "PaymentType";
+
+-- ALTER TABLE "Wallet" 
+-- ADD COLUMN IF NOT EXISTS "status_new" "WalletStatus";
+
+-- ALTER TABLE "FundRequest" 
+-- ADD COLUMN IF NOT EXISTS "status_new" "RequestStatus";
+
+-- -- Step 4: Migrate existing data to new enum columns
+-- UPDATE "Transaction" 
+-- SET "status_new" = CASE 
+--     WHEN status::text = 'PENDING' THEN 'PENDING'::"TransactionStatus"
+--     WHEN status::text = 'COMPLETED' THEN 'COMPLETED'::"TransactionStatus"
+--     WHEN status::text = 'FAILED' THEN 'FAILED'::"TransactionStatus"
+--     WHEN status::text = 'CANCELLED' THEN 'CANCELLED'::"TransactionStatus"
+--     ELSE 'PENDING'::"TransactionStatus"
+-- END,
+-- "type_new" = CASE 
+--     WHEN type::text = 'DEPOSIT' THEN 'DEPOSIT'::"TransactionType"
+--     WHEN type::text = 'WITHDRAWAL' THEN 'WITHDRAWAL'::"TransactionType"
+--     WHEN type::text = 'TRANSFER' THEN 'TRANSFER'::"TransactionType"
+--     WHEN type::text = 'REQUEST_PAYMENT' THEN 'REQUEST_PAYMENT'::"TransactionType"
+--     ELSE 'TRANSFER'::"TransactionType"
+-- END;
+
+-- UPDATE "PaymentMethod" 
+-- SET "status_new" = CASE 
+--     WHEN status::text = 'ACTIVE' THEN 'ACTIVE'::"AccountStatus"
+--     WHEN status::text = 'INACTIVE' THEN 'INACTIVE'::"AccountStatus"
+--     WHEN status::text = 'SUSPENDED' THEN 'SUSPENDED'::"AccountStatus"
+--     WHEN status::text = 'CLOSED' THEN 'CLOSED'::"AccountStatus"
+--     ELSE 'ACTIVE'::"AccountStatus"
+-- END,
+-- "type_new" = CASE 
+--     WHEN type::text = 'BANK_ACCOUNT' THEN 'BANK_ACCOUNT'::"PaymentType"
+--     WHEN type::text = 'MOBILE_MONEY' THEN 'MOBILE_MONEY'::"PaymentType"
+--     WHEN type::text = 'CARD' THEN 'CARD'::"PaymentType"
+--     ELSE 'BANK_ACCOUNT'::"PaymentType"
+-- END;
+
+-- UPDATE "Wallet" 
+-- SET "status_new" = CASE 
+--     WHEN status::text = 'ACTIVE' THEN 'ACTIVE'::"WalletStatus"
+--     WHEN status::text = 'INACTIVE' THEN 'INACTIVE'::"WalletStatus"
+--     WHEN status::text = 'FROZEN' THEN 'FROZEN'::"WalletStatus"
+--     ELSE 'ACTIVE'::"WalletStatus"
+-- END;
+
+-- UPDATE "FundRequest" 
+-- SET "status_new" = CASE 
+--     WHEN status::text = 'PENDING' THEN 'PENDING'::"RequestStatus"
+--     WHEN status::text = 'COMPLETED' THEN 'COMPLETED'::"RequestStatus"
+--     WHEN status::text = 'CANCELLED' THEN 'CANCELLED'::"RequestStatus"
+--     WHEN status::text = 'EXPIRED' THEN 'EXPIRED'::"RequestStatus"
+--     ELSE 'PENDING'::"RequestStatus"
+-- END;
+
+-- -- Step 5: Drop old columns and rename new ones
+-- ALTER TABLE "Transaction" 
+-- DROP COLUMN IF EXISTS "status",
+-- DROP COLUMN IF EXISTS "type",
+-- ALTER COLUMN "status_new" SET NOT NULL,
+-- ALTER COLUMN "type_new" SET NOT NULL,
+-- RENAME COLUMN "status_new" TO "status",
+-- RENAME COLUMN "type_new" TO "type";
+
+-- ALTER TABLE "PaymentMethod" 
+-- DROP COLUMN IF EXISTS "status",
+-- DROP COLUMN IF EXISTS "type",
+-- ALTER COLUMN "status_new" SET NOT NULL,
+-- ALTER COLUMN "type_new" SET NOT NULL,
+-- RENAME COLUMN "status_new" TO "status",
+-- RENAME COLUMN "type_new" TO "type";
+
+-- ALTER TABLE "Wallet" 
+-- DROP COLUMN IF EXISTS "status",
+-- ALTER COLUMN "status_new" SET NOT NULL,
+-- RENAME COLUMN "status_new" TO "status";
+
+-- ALTER TABLE "FundRequest" 
+-- DROP COLUMN IF EXISTS "status",
+-- ALTER COLUMN "status_new" SET NOT NULL,
+-- RENAME COLUMN "status_new" TO "status";
+
+-- -- Step 6: Add indexes
+-- CREATE INDEX IF NOT EXISTS "Notification_userId_idx" ON "Notification"("userId");
+-- CREATE INDEX IF NOT EXISTS "Notification_read_idx" ON "Notification"("read");
+-- CREATE INDEX IF NOT EXISTS "FundRecipient_requestId_idx" ON "FundRecipient"("requestId");
+-- CREATE INDEX IF NOT EXISTS "FundRecipient_userId_idx" ON "FundRecipient"("userId");
+
+-- -- Step 7: Add foreign key constraints
+-- ALTER TABLE "Notification"
+-- ADD CONSTRAINT "Notification_userId_fkey"
+-- FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- ALTER TABLE "FundRecipient"
+-- ADD CONSTRAINT "FundRecipient_requestId_fkey"
+-- FOREIGN KEY ("requestId") REFERENCES "FundRequest"("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+-- ADD CONSTRAINT "FundRecipient_userId_fkey"
+-- FOREIGN KEY ("userId") REFERENCES "User"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

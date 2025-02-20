@@ -49,7 +49,7 @@ export default SignIn
 
 // SIGN IN FORM 
 
-// Define form schema using Zod for validation
+// Define sign inform schema using Zod for validation
 const signInSchema = z.object({
   email: z.string().email("Invalid email address").min(1, "Email is required"),
   password: z.string().min(6, "Password must be at least 6 characters").min(1, "Password is required"),
@@ -134,7 +134,7 @@ export const SignInForm = () => {
           )}
           <Link
             href="/forgot-password"
-            className="text-primary text-sm text-end hover:underline"
+            className="text-primary text-xs text-end hover:underline"
           >
             Forgot Password?
           </Link>

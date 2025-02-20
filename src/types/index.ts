@@ -4,4 +4,5 @@ export type UserData = {
     username: string | null;
     phone: string | null;
     gender: string | null;
+    avatar_url?: string | null;
   } | null;

@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { app } from '@/constants/ganeral-info';
 import { useUser } from '@/hooks/use-user';
 import { ChevronDown } from 'lucide-react'; 
+import { usePathname } from 'next/navigation'; 
+
  
 import {
   Sheet,
@@ -20,6 +22,7 @@ import {
 } from "@/components/ui/sheet" 
 import { ProfileImageCard } from './profile-image-card';
 import { LogoutButton } from './logout-button';
+import { hideNavbarPaths } from './hide-navbar-routes';
 
 // Auth buttons component
 const AuthButtons = () => (
@@ -44,7 +47,7 @@ export const ProfileImage = () => {
 
   return (
     <>
-    <p>Hi, {user.username}</p>
+    <p className='~text-xs/normal '>Hi, {user.username}</p>
  
     <Sheet>
       <SheetTrigger asChild>
@@ -75,10 +78,9 @@ export const ProfileImage = () => {
             onAvatarClick={() => {
               console.log("Avatar clicked")
             }}
-          />
-
-
+          /> 
         </div>
+        
         <SheetFooter>
           <SheetClose asChild>
             <LogoutButton className='w-full text-primary/70 hover:text-primary hover:bg-primary/10'/>
@@ -110,14 +112,17 @@ export const Navbar = () => {
   );
 };
 
-
-
-
-
-
-
-
-
+ 
+// Navbar wrapper component
+// to tell places to hide navbar
+export default function NavbarWrapper() {
+  const pathname = usePathname();
+ 
+  if (hideNavbarPaths.includes(pathname)) {
+    return null;
+  } 
+  return <Navbar />;
+}
 
 
 

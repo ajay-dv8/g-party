@@ -35,7 +35,7 @@ const PasswordInput = forwardRef<HTMLInputElement, PasswordInputProps>(
           <Link
             href="/forgot-password"
             className={cn(
-              "text-muted-foreground text-sm text-end hover:underline",
+              "text-muted-foreground text-xs text-end hover:underline ",
               forgotPasswordClassName
             )}
           >

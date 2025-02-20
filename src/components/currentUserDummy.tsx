@@ -2,15 +2,9 @@
 import React, { useEffect, useState } from "react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar"; // Adjust import paths as needed
 import { getCurrentUser } from "@/app/actions/getUser/action";
+import { UserData } from "@/types";
  
-
-type UserData = {
-  full_name: string | null;
-  email: string | null;
-  username: string | null;
-  phone: string | null;
-  gender: string | null;
-} | null;
+ 
 
 export const UserProfile = () => {
   const [user, setUser] = useState<UserData>(null);

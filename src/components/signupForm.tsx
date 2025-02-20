@@ -21,6 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import Link from 'next/link';
 
 // Define form schema using Zod for validation
 const signUpSchema = z.object({
@@ -58,24 +59,26 @@ export const SignUpForm = () => {
       const formattedData = {
         ...data,
         // dateOfBirth: data.dateOfBirth.toISOString(), // Convert date to ISO string
+        // phone: typeof data.phone === 'string' ? data.phone : String(data.phone),
       };
 
-      // console.log('Formatted Data:', formattedData); // Debugging log(shows signup details)
+      console.log('Formatted Data:', formattedData); // Debugging log(shows signup details)
 
-      const response = await axios.post('/api/signup', formattedData, {
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      const response = await axios.post('/api/signup', formattedData );
 
-      if (!response.data || !response.status.toString().startsWith('2')) {
-        throw new Error('Signup failed');
+      // if (!response.data || !response.status.toString().startsWith('2')) {
+      //   throw new Error('Signup failed');
+      // }
+
+      // router.push('/dashboard');
+      if (response.status === 200) {
+        router.push('/dashboard');
+      } else {
+        throw new Error(response.data.message || 'Signup failed');
       }
-
-      router.push('/dashboard');
     } catch (error: any) {
-      console.error('Signup error:', error.message || error);
-      alert('Signup failed. Please try again.');
+      console.error('Signup error:', error.response?.data?.message || error.message || error);
+      alert(error.response?.data?.message || 'Signup failed. Please try again.');
     }
   };
 
@@ -168,7 +171,17 @@ export const SignUpForm = () => {
             <Button type="submit" >Submit</Button>
           )}
         </div>
+
+        <p className="text-muted-foreground text-sm mt-4 text-center">
+        Already have an account?{" "}
+        <Link
+          href="/sign-in"
+          className="text-primary hover:underline"
+        >
+          Sign in
+        </Link>
+      </p>
       </form>
     </div>
   );
-};
+} 

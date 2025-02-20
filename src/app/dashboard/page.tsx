@@ -1,12 +1,9 @@
-"use client";
-import { Button } from '@/components/ui/button'
-import { supabase } from '@/utils/supabase/auth-client'
+"use client"; 
 import React from 'react' 
-import { useRouter } from 'next/navigation' 
-import { UserProfile } from '@/components/currentUserDummy';
 import { ActionCard, BalanceCard, ConnectedAccountCard } from './_component/dash-cards';
 import { useUser } from '@/hooks/use-user'; 
 import { Plus, Receipt, Send } from 'lucide-react';
+import { RecentActivityTable } from './_component/recent-table';
 
 const actionCardInfo = [
   {
@@ -29,21 +26,14 @@ const actionCardInfo = [
   },
 ]
 
-const Dashboard = () => {
-  const { user, loading, error } = useUser();
+const Dashboard = () => { 
+  const { user, loading, error } = useUser(); 
 
   if (loading) return <div className="animate-pulse w-8 h-8 rounded-full bg-gray-200" />;
   if (error || !user) return null;
-
-  const router = useRouter()
-
-  const signout = async () => {
-    await supabase.auth.signOut()
-    router.push('/sign-in')
-  }
-
+ 
   return (
-    <div className='w-full grid grid-cols-5 gap-x-10 mt-10'> 
+    <div className='w-full grid grid-cols-5 gap-x-10 mt-10 ~px-4/24'> 
       <div className='col-span-2 flex flex-col gap-y-10'> 
         <BalanceCard 
         currency ={'$'}
@@ -69,11 +59,14 @@ const Dashboard = () => {
         />
       </div>
 
-      <div className='col-span-3'>
-        <Button onClick={signout}> 
-          Logout
-        </Button> 
-        <UserProfile />
+      <div className='col-span-3 px-10'>
+          <div className="w-full  bg-white shadow-sm hover:shadow-md transition-all duration-500 py-4 px-6 border border-gray-200 rounded-md">
+            <div className="flex items-center justify-between border-b pb-2 mb-2 border-primary/20">
+              <h3 className="text-primary font-bold">Recent Activity</h3>
+              {/* <p className="text-gray-400 text-xs">filter</p> */}
+            </div>
+            <RecentActivityTable/>
+          </div>
       </div> 
     </div>
   )
