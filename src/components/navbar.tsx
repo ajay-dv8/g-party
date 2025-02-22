@@ -4,11 +4,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Button } from './ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
-import { app } from '@/constants/ganeral-info';
-import { useUser } from '@/hooks/use-user';
+import { app } from '@/constants/ganeral-info'; 
 import { ChevronDown } from 'lucide-react'; 
 import { usePathname } from 'next/navigation'; 
-
  
 import {
   Sheet,
@@ -23,6 +21,7 @@ import {
 import { ProfileImageCard } from './profile-image-card';
 import { LogoutButton } from './logout-button';
 import { hideNavbarPaths } from './hide-navbar-routes';
+import { useUser } from '@/hooks/useUser';
 
 // Auth buttons component
 const AuthButtons = () => (
@@ -47,7 +46,7 @@ export const ProfileImage = () => {
 
   return (
     <>
-    <p className='~text-xs/normal '>Hi, {user.username}</p>
+    <p className='~text-xs/normal '>Hi, {user?.username}</p>
  
     <Sheet>
       <SheetTrigger asChild>
@@ -79,6 +78,15 @@ export const ProfileImage = () => {
               console.log("Avatar clicked")
             }}
           /> 
+        </div>
+        <div className="flex flex-col gap-y-2">
+          <Link href="/dashboard" passHref> 
+            Dashboard 
+          </Link>
+          <Link href="/home" passHref> 
+            Home 
+          </Link>
+
         </div>
         
         <SheetFooter>
@@ -125,68 +133,4 @@ export default function NavbarWrapper() {
 }
 
 
-
-
-
-
- 
-// export const Navbar = () => {
-
-//   const [user, setUser] = useState<UserData | null>(null);
-//   const [loading, setLoading] = useState(true);
-
-//   useEffect(() => {
-//     const fetchUser = async () => {
-//       try {
-//         const userData = await getCurrentUser();
-//         setUser(userData);
-//       } catch (error) {
-//         console.error('Error fetching user:', error);
-//       } finally {
-//         setLoading(false);
-//       }
-//     };
-
-//     fetchUser();
-//   }, []);
-
-//   return (
-//     <div className="w-full flex justify-between items-center ~px-4/20 ~py-2/4 ">
-//       <div className="flex items-center gap-x-3">
-//         <Image src={app.logo} alt="logo" width={50} height={50}/>  
-//         <h1 className="text-2xl font-bold">{app.name}</h1>
-//       </div>
-
-//       {/* Auth Buttons or Profile Section */}
-//       {!loading && (
-//         <div className="flex items-center gap-x-4">
-//           {!user ? (
-//             // Show auth buttons when user is not logged in
-//             <>
-//               <Link href="/sign-in" passHref>
-//                 <Button
-//                   variant="outline"
-//                   className="text-primary hover:bg-primary/80 hover:text-primary-foreground transition-all duration-500"
-//                 >
-//                   Login
-//                 </Button>
-//               </Link>
-              
-//               <Link href="/sign-up" passHref>
-//                 <Button>Sign Up</Button>
-//               </Link>
-//             </>
-//           ) : (
-//             // Show profile image when user is logged in
-//             <div className="flex items-center gap-x-2">
-//               {/* You can add user name or other elements here */}
-//               <ProfileImage />
-//             </div>
-//           )}
-//         </div>
-//       )}
-//     </div>
-//   )
-// }
- 
  

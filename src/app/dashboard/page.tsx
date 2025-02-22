@@ -1,7 +1,7 @@
 "use client"; 
 import React from 'react' 
 import { ActionCard, BalanceCard, ConnectedAccountCard } from './_component/dash-cards';
-import { useUser } from '@/hooks/use-user'; 
+import { useUser } from '@/hooks/useUser'; 
 import { Plus, Receipt, Send } from 'lucide-react';
 import { RecentActivityTable } from './_component/recent-table';
 
