@@ -21,7 +21,8 @@ import {
 import { ProfileImageCard } from './profile-image-card';
 import { LogoutButton } from './logout-button';
 import { hideNavbarPaths } from './hide-navbar-routes';
-import { useUser } from '@/hooks/useUser';
+import { useUserStore } from '@/store/userStore';
+// import { useUser } from '@/hooks/useUser';
 
 // Auth buttons component
 const AuthButtons = () => (
@@ -39,7 +40,8 @@ const AuthButtons = () => (
 
 // Profile image component
 export const ProfileImage = () => {
-  const { user, loading, error } = useUser();
+  // const { user, loading, error } = useUser();
+  const { user, loading, error } = useUserStore();
 
   if (loading) return <div className="animate-pulse w-8 h-8 rounded-full bg-gray-200" />;
   if (error || !user) return null;
@@ -102,7 +104,7 @@ export const ProfileImage = () => {
 
 // Main navbar component
 export const Navbar = () => {
-  const { user, loading } = useUser();
+  const { user, loading } = useUserStore();
 
   return (
     <nav className="w-full flex justify-between items-center ~px-4/20 ~py-2/4 ">

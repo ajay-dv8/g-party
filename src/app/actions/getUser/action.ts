@@ -1,8 +1,8 @@
- import { supabase } from "@/utils/supabase/auth-client";
+ import { supabase } from "@/utils/supabase/auth-client"; 
 
  
-export const getCurrentUser = async () => {
-  try {
+export const getCurrentUser = async () => { 
+  try { 
     // TODO: Implement and explain rate limiting
  
     if (!supabase) {

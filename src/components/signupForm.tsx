@@ -66,11 +66,6 @@ export const SignUpForm = () => {
 
       const response = await axios.post('/api/signup', formattedData );
 
-      // if (!response.data || !response.status.toString().startsWith('2')) {
-      //   throw new Error('Signup failed');
-      // }
-
-      // router.push('/dashboard');
       if (response.status === 200) {
         router.push('/dashboard');
       } else {

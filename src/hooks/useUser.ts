@@ -1,4 +1,6 @@
- import { useUserStore } from "@/store/userStore"; 
+// hooks/useUser.ts
+"use client";
+import { useUserStore } from "@/store/userStore"; 
 import { useEffect } from "react";
 
 
