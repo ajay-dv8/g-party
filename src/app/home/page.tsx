@@ -1,6 +1,8 @@
 "use client"
 import React from 'react'
 import { PostCreator } from './_components/post-input' 
+import PostList from '@/components/post/post-list'
+// import PostList from '@/components/post-list'
 
 const Home = () => {
   return (
@@ -12,6 +14,8 @@ const Home = () => {
       onFeeling={() => console.log("Feeling clicked")}
       onCreateStory={() => console.log("Create story clicked")}
     /> 
+
+    <PostList />
   </div>
   )
 }

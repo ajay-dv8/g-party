@@ -1,8 +1,7 @@
 "use client";
 import React, { MouseEventHandler, useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button" 
 import { Separator } from "@/components/ui/separator"
 import { Camera, ImageIcon, SmilePlus, Plus } from "lucide-react"
 import { useUser } from '@/hooks/useUser';
@@ -125,10 +124,8 @@ export function CreatePostModal() {
   return (
     <div className="w-full flex items-center justify-center">
       <Modal>
-        <ModalTrigger className="w-full">
-          <div className="bg-muted/50 border-0 rounded-full p-4 cursor-text">
-            {`What's on your mind, ${user?.username || 'User'}?`}
-          </div>
+        <ModalTrigger className="w-full text-start cursor-pointer font-normal text-gray-400"> 
+          <p className="w-full text-start"> {`What's on your mind ?, ${user?.username || 'User'}...`} </p>
         </ModalTrigger>
         <ModalBody>
           <form onSubmit={handleSubmit}>
@@ -153,7 +150,7 @@ export function CreatePostModal() {
               <div className="py-6 flex flex-wrap gap-x-4 gap-y-6 items-start justify-start w-full mx-auto">
                 <Textarea
                   name="post"
-                  className="text-xl resize-none rounded-xl w-full placeholder:text-xl focus-visible:outline-none focus-visible:ring-0 border-none"
+                  className="text-xl min-h-[80px] resize-none rounded-xl w-full placeholder:text-xl focus-visible:outline-none focus-visible:ring-0 border-none"
                   rows={6}
                   placeholder={`What's on your mind, ${user?.username || 'User'}?`}
                   required

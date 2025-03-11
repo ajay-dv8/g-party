@@ -4,6 +4,28 @@
 import { prisma } from "@/lib/prisma"; 
 import { supabase } from '@/utils/supabase/auth-client';
 
+export async function getCurrentUserSession(accessToken: string) {
+  try {
+        // Authenticate the user using the access token
+        const { data: authData, error: authError } = await supabase.auth.getUser(accessToken);
+
+        if (authError || !authData?.user) {
+          return {
+            error: 'Authentication required',
+            success: false
+          };
+        }
+    
+        // TODO: uncomment
+        console.log("Authenticated user:", authData);
+    
+    return authData;
+  } catch (error) {
+    console.error("Error getting current user:", error);
+    return null;
+  }
+}
+
 export async function createPost(postContent: string, accessToken: string) {
   try {
     if (!postContent) {
@@ -23,6 +45,7 @@ export async function createPost(postContent: string, accessToken: string) {
       };
     }
 
+    // TODO: uncomment
     console.log("Authenticated user:", authData);
 
     // Create post in the database
