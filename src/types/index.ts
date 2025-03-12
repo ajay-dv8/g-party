@@ -11,7 +11,7 @@ export type UserData = {
 
 
 
-   
+ 
 export interface Author {
   id: string;
   username: string;
@@ -25,6 +25,7 @@ export interface Reply {
   createdAt: string;
   likes: Like[];
   isLiked?: boolean;
+  replies: Reply[];
 }
 
 export interface Comment {
@@ -53,36 +54,8 @@ export interface Post {
   isLiked?: boolean;
 }
 
-
-// export interface PostStore {
-//   posts: Post[];
-//   loading: boolean;
-//   commentContent: Record<string, string>;
-//   replyContent: Record<string, string>;
-//   nestedReplyContent: Record<string, string>;
-  
-//   setPosts: (posts: Post[]) => void;
-//   setLoading: (loading: boolean) => void;
-//   setCommentContent: (postId: string, content: string) => void;
-//   setReplyContent: (commentId: string, content: string) => void;
-//   setNestedReplyContent: (replyId: string, content: string) => void;
-  
-//   addComment: (postId: string, comment: Comment) => void;
-//   addReply: (postId: string, commentId: string, reply: Reply) => void;
-//   addNestedReply: (postId: string, commentId: string, replyId: string, nestedReply: any) => void;
-  
-//   togglePostLike: (postId: string, userId: string) => void;
-//   toggleCommentLike: (postId: string, commentId: string, userId: string) => void;
-//   toggleReplyLike: (postId: string, commentId: string, replyId: string, userId: string) => void;
-  
-//   toggleShowReplies: (postId: string, commentId: string) => void;
-//   toggleReplyInput: (postId: string, commentId: string) => void;
-//   toggleNestedReplyInput: (postId: string, commentId: string, replyId: string) => void;
-// }
-
 export interface PostStore {
-  posts: Post[];
-  // posts: any[];
+  posts: Post[]; 
   loading: boolean;
   commentContent: Record<string, string>;
   replyContent: Record<string, string>;

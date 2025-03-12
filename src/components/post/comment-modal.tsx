@@ -32,7 +32,7 @@ export function CommentsModal({ post }: CommentsModalProps) {
   // Custom scrollbar styles
   useEffect(() => {
     if (isOpen && !commentsLoaded) {
-      // This is where you would fetch comments if they weren't loaded yet
+      // This is where to fetch comments if they weren't loaded yet
       setCommentsLoaded(true);
     }
   }, [isOpen, commentsLoaded]);
@@ -84,6 +84,7 @@ export function CommentsModal({ post }: CommentsModalProps) {
           <style jsx global>{`
             .custom-scrollbar::-webkit-scrollbar {
               width: 6px;
+              height: 90%;
             }
             
             .custom-scrollbar::-webkit-scrollbar-track {

@@ -70,5 +70,4 @@ export async function createPost(postContent: string, accessToken: string) {
     };
   }
 }
-
  

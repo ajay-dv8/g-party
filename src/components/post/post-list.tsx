@@ -5,6 +5,7 @@ import { fetchPosts } from "@/app/actions/postActions/action";
 import { usePostStore } from "@/store/usePostStore";
 import { useEffect } from "react";  
 import { PostItem } from "./post-items";
+import { Post } from "@/types";
 
 export default function PostList() {
   const { posts, loading, setPosts, setLoading } = usePostStore();
@@ -14,7 +15,7 @@ export default function PostList() {
       const fetchedPosts = await fetchPosts();
       
       // Process posts to add UI state properties
-      const processedPosts = fetchedPosts.map(post => ({
+      const processedPosts = fetchedPosts.map( post => ({
         ...post,
         comments: post.comments.map(comment => ({
           ...comment,

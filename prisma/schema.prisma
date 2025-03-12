@@ -335,21 +335,21 @@ model Post {
 // 💬 COMMENT MODEL
 // ==============================================
 model Comment {
-  id            String    @id @default(uuid()) @db.Uuid  // Unique identifier for the comment
-  content       String    // Text content of the comment
+  id         String     @id @default(uuid()) @db.Uuid
+  content    String
+  author     User       @relation("UserComments", fields: [authorId], references: [id], onDelete: Cascade)
+  authorId   String     @db.Uuid
+  post       Post?      @relation(fields: [postId], references: [id], onDelete: Cascade)
+  postId     String?    @db.Uuid
   
-  author        User      @relation("UserComments", fields: [authorId], references: [id], onDelete: Cascade)
-  authorId      String    @db.Uuid  // ID of the user who wrote the comment
-  
-  post          Post      @relation(fields: [postId], references: [id], onDelete: Cascade)
-  postId        String    @db.Uuid  // ID of the post this comment belongs to
-  
-  // Self-relation for nested comment replies
   parentComment Comment?  @relation("CommentReplies", fields: [parentId], references: [id])
-  parentId      String?   @db.Uuid  // ID of the parent comment (null if this is a top-level comment)
-  replies       Comment[] @relation("CommentReplies") // Child comments/replies to this comment
-  
-  likes         Like[]    // All likes on this comment
+  parentId   String?   @db.Uuid  // Nullable: for replies to replies
+  replies    Comment[] @relation("CommentReplies") // Nested replies
+
+  likes      Like[]    @relation("CommentLikes")    // Support for likes on replies
+
+  // likesOnComment Like[] @relation("LikeOnComment")
+  // likesOnReply   Like[] @relation("ReplyLikes")
   
   createdAt     DateTime  @default(now())  // When the comment was created
   updatedAt     DateTime  @updatedAt       // When the comment was last updated
@@ -371,18 +371,22 @@ model Like {
   post          Post?     @relation(fields: [postId], references: [id], onDelete: Cascade)
   postId        String?   @db.Uuid  // ID of the liked post (null if this is a comment like)
   
-  comment       Comment?  @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  comment    Comment? @relation("CommentLikes", fields: [commentId], references: [id], onDelete: Cascade)
   commentId     String?   @db.Uuid  // ID of the liked comment (null if this is a post like)
+
+  // reply      Comment? @relation("ReplyLikes", fields: [replyId], references: [id], onDelete: Cascade)
+  // replyId    String?  @db.Uuid  // New field to track likes on replies
   
   createdAt     DateTime  @default(now())  // When the like was created
   
   // Ensures a user can only like a post once
-  @@unique([userId, postId])
-  // Ensures a user can only like a comment once
+  @@unique([userId, postId]) 
   @@unique([userId, commentId])
+  // @@unique([userId, replyId])   
   @@index([userId])    // Speeds up queries for finding likes by a specific user
   @@index([postId])    // Speeds up queries for finding likes on a specific post
   @@index([commentId]) // Speeds up queries for finding likes on a specific comment
+  // @@index([replyId])   // Speeds up queries for finding likes on a specific reply
 }
 
 // ==============================================

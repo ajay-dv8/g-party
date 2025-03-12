@@ -4,20 +4,19 @@
 import { prisma } from "@/lib/prisma";
 
 // ✅ Fetch all posts with comments & likes
+
 export async function fetchPosts() {
   try {
     const posts = await prisma.post.findMany({
       include: {
-        author: {
-          select: { id: true, username: true },
-        },
+        author: { select: { id: true, username: true } },
         likes: true,
         comments: {
           include: {
             author: { select: { id: true, username: true } },
-            likes: true,
+            likes: true, // Ensure this exists in your Prisma schema
             replies: {
-              include: { 
+              include: {
                 author: { select: { id: true, username: true } },
                 likes: true
               }
@@ -36,6 +35,41 @@ export async function fetchPosts() {
     return []; // Return empty array to prevent crashes
   }
 }
+
+
+
+// export async function fetchPosts() {
+//   try {
+//     const posts = await prisma.post.findMany({
+//       include: {
+//         author: {
+//           select: { id: true, username: true },
+//         },
+//         likes: true,
+//         comments: {
+//           include: {
+//             author: { select: { id: true, username: true } },
+//             likes: true, // ✅ Ensure likes are included
+//             replies: {
+//               include: { 
+//                 author: { select: { id: true, username: true } },
+//                 likes: true
+//               }
+//             }
+//           } 
+//         }
+//       },
+//       orderBy: { createdAt: 'desc' }
+//     });
+
+//     if (!posts) throw new Error("No posts found or database returned null.");
+    
+//     return posts;
+//   } catch (error) {
+//     console.error("Error fetching posts:", error);
+//     return []; // Return empty array to prevent crashes
+//   }
+// }
 
 // ✅ Like or Unlike a Post
 export async function toggleLike(postId: string, userId: string) {

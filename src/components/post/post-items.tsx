@@ -4,7 +4,7 @@
 import { toggleLike } from "@/app/actions/postActions/action";
 import { useUser } from "@/hooks/useUser";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import { Heart, MessageCircleMore, Share } from "lucide-react";
+import { Heart, Share } from "lucide-react";
 import { Button } from "../ui/button";
 import { Separator } from "../ui/separator"; 
 import { usePostStore } from "@/store/usePostStore";

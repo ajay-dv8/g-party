@@ -1,5 +1,5 @@
 // store/usePostStore.ts
-import { PostStore } from "@/types";
+import { PostStore, Reply } from "@/types";
 import { create } from "zustand";
 
 export const usePostStore = create<PostStore>((set) => ({
@@ -58,34 +58,49 @@ export const usePostStore = create<PostStore>((set) => ({
         )
       })),
     
-    toggleReplyLike: (postId, commentId, replyId, userId) => 
-      set((state) => ({
-        posts: state.posts.map(post =>
-          post.id === postId
-            ? {
-                ...post,
-                comments: post.comments.map(comment =>
-                  comment.id === commentId
-                    ? {
-                        ...comment,
-                        replies: comment.replies.map(reply =>
-                          reply.id === replyId
-                            ? {
-                                ...reply,
-                                isLiked: !reply.isLiked,
-                                likes: reply.isLiked
-                                  ? reply.likes.filter(like => like.userId !== userId)
-                                  : [...reply.likes, { userId }]
-                              }
-                            : reply
-                        )
-                      }
-                    : comment
-                )
-              }
-            : post
-        )
-      })),
+      toggleReplyLike: (postId, commentId, replyId, userId) =>
+        set((state) => ({
+          posts: state.posts.map((post) =>
+            post.id === postId
+              ? {
+                  ...post,
+                  comments: post.comments.map((comment) =>
+                    comment.id === commentId
+                      ? {
+                          ...comment,
+                          replies: comment.replies.map((reply) =>
+                            reply.id === replyId
+                              ? {
+                                  ...reply,
+                                  isLiked: !reply.isLiked,
+                                  likes: reply.isLiked
+                                    ? reply.likes.filter((like) => like.userId !== userId)
+                                    : [...reply.likes, { userId }]
+                                }
+                              : {
+                                  ...reply,
+                                  replies: reply.replies.map((nestedReply) =>
+                                    nestedReply.id === replyId
+                                      ? {
+                                          ...nestedReply,
+                                          isLiked: !nestedReply.isLiked,
+                                          likes: nestedReply.isLiked
+                                            ? nestedReply.likes.filter((like) => like.userId !== userId)
+                                            : [...nestedReply.likes, { userId }]
+                                        }
+                                      : nestedReply
+                                  )
+                                }
+                          )
+                        }
+                      : comment
+                  )
+                }
+              : post
+          )
+        })),
+      
+      
     
     addComment: (postId, comment) => 
       set((state) => ({
@@ -96,28 +111,60 @@ export const usePostStore = create<PostStore>((set) => ({
         ),
         commentContent: { ...state.commentContent, [postId]: "" }
       })),
+
+
+      addReply: (postId, commentId, reply) =>
+  set((state) => ({
+    posts: state.posts.map((post) =>
+      post.id === postId
+        ? {
+            ...post,
+            comments: post.comments.map((comment) =>
+              comment.id === commentId
+                ? {
+                    ...comment,
+                    replies: [...comment.replies, reply],
+                    showReplies: true,
+                    showReplyInput: false,
+                  }
+                : comment
+            ),
+          }
+        : post
+    ),
+    replyContent: { ...state.replyContent, [commentId]: "" },
+  })),
+
     
-    addReply: (postId, commentId, reply) => 
-      set((state) => ({
-        posts: state.posts.map(post =>
-          post.id === postId
-            ? {
-                ...post,
-                comments: post.comments.map(comment =>
-                  comment.id === commentId
-                    ? {
-                        ...comment,
-                        replies: [...comment.replies, reply],
-                        showReplies: true,
-                        showReplyInput: false
-                      }
-                    : comment
-                )
-              }
-            : post
-        ),
-        replyContent: { ...state.replyContent, [commentId]: "" }
-      })),
+      // addReply: (postId, commentId, replyId,reply ) =>
+      //   set((state) => ({
+      //     posts: state.posts.map((post) =>
+      //       post.id === postId
+      //         ? {
+      //             ...post,
+      //             comments: post.comments.map((comment) =>
+      //               comment.id === commentId
+      //                 ? {
+      //                     ...comment,
+      //                     replies: comment.replies.map((replyItem) =>
+      //                       replyItem.id === replyId
+      //                         ? {
+      //                             ...replyItem,
+      //                             replies: [...replyItem.replies, reply],
+      //                             showReplies: true,
+      //                             showReplyInput: false
+      //                           }
+      //                         : replyItem
+      //                     )
+      //                   }
+      //                 : comment
+      //             )
+      //           }
+      //         : post
+      //     ),
+      //     replyContent: { ...state.replyContent, [replyId]: "" }
+      //   })),
+      
     
     toggleShowReplies: (postId, commentId) => 
       set((state) => ({
